@@ -3,9 +3,9 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import Navbar from '@/components/shared/Navbar';
 import Toast from '@/components/shared/Toast';
+import { Package, Camera, Image as ImageIcon, X } from '@phosphor-icons/react';
 
 const CATEGORIES = ['Elektronik', 'Atribut', 'Alat Tulis', 'Dompet/Kunci', 'Lainnya'];
 
@@ -18,7 +18,6 @@ export default function AdminUploadPage() {
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
-  // Bersihkan stream saat komponen ditutup agar kamera tidak nyala terus
   useEffect(() => {
     return () => {
       if (stream) {
@@ -93,7 +92,6 @@ export default function AdminUploadPage() {
     try {
       let image_url = '';
 
-      // 1. Upload Gambar ke Supabase Storage
       if (file) {
         const fileExt = file.name.split('.').pop() || 'jpg';
         const fileName = `nawa-${Date.now()}.${fileExt}`;
@@ -109,7 +107,6 @@ export default function AdminUploadPage() {
           return;
         }
 
-        // 3. Jika berhasil masuk, minta URL Publik dari Supabase
         const { data: urlData } = supabase.storage
           .from('item-image')
           .getPublicUrl(fileName);
@@ -117,7 +114,6 @@ export default function AdminUploadPage() {
         image_url = urlData.publicUrl;
       }
 
-      // 2. Insert Data ke Table 'items'
       const { error } = await supabase.from('items').insert([{
         title,
         category,
@@ -141,32 +137,32 @@ export default function AdminUploadPage() {
   };
 
   return (
-    <main className="min-h-screen bg-background pt-32 pb-20 px-6 transition-colors duration-300">
+    <main className="min-h-screen bg-background pt-32 pb-24 px-6 transition-colors duration-300">
       <Navbar />
       
-      <div className="max-w-xl mx-auto glass rounded-[32px] md:rounded-[48px] p-6 md:p-10 shadow-premium animate-fade-in-up border-white">
-        <header className="mb-8 md:mb-10 text-center">
-          <div className="w-14 h-14 md:w-16 md:h-16 bg-blue-50 rounded-[20px] md:rounded-[24px] flex items-center justify-center mx-auto mb-4 md:mb-6">
-            <span className="text-2xl md:text-3xl">📦</span>
+      <div className="max-w-2xl mx-auto bg-card rounded-3xl p-8 md:p-12 shadow-soft animate-fade-in-up border border-border">
+        <header className="mb-10 text-center">
+          <div className="w-16 h-16 bg-primary/10 text-primary rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <Package weight="duotone" className="w-8 h-8" />
           </div>
-          <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tighter mb-2">Input Barang Temuan</h1>
-          <p className="text-[10px] md:text-sm font-medium text-slate-400 dark:text-slate-500">Pastikan data yang diinput sudah sesuai dengan barang aslinya.</p>
+          <h1 className="text-3xl md:text-4xl font-extrabold text-foreground tracking-tight mb-3">Input Barang Temuan</h1>
+          <p className="text-sm font-medium text-muted-foreground">Pastikan data yang diinput sudah sesuai dengan barang aslinya.</p>
         </header>
 
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* Upload Foto Section */}
           <div className="space-y-4">
-            <label className="text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 block">Foto Barang</label>
+            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground block">Foto Barang</label>
             
             {preview ? (
-              <div className="relative h-72 w-full rounded-[32px] overflow-hidden shadow-soft group border-4 border-white dark:border-slate-800">
-                <img src={preview} alt="Preview" className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-700" />
+              <div className="relative h-72 w-full rounded-2xl overflow-hidden shadow-sm group border border-border">
+                <img src={preview} alt="Preview" className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500" />
                 <button 
                   type="button"
                   onClick={() => { setFile(null); setPreview(null); }}
-                  className="absolute top-4 right-4 bg-red-500 text-white w-10 h-10 rounded-full shadow-xl flex items-center justify-center font-bold hover:scale-110 active:scale-95 transition-all"
+                  className="absolute top-4 right-4 bg-background/90 backdrop-blur-sm text-foreground w-10 h-10 rounded-full shadow-sm flex items-center justify-center hover:bg-destructive hover:text-white transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary cursor-pointer"
                 >
-                  ✕
+                  <X weight="bold" className="w-5 h-5" />
                 </button>
               </div>
             ) : (
@@ -174,23 +170,23 @@ export default function AdminUploadPage() {
                 <button
                   type="button"
                   onClick={startCamera}
-                  className="h-40 bg-background border-2 border-dashed border-slate-100 rounded-[32px] flex flex-col items-center justify-center hover:border-blue-400 hover:bg-blue-50 transition-all group"
+                  className="h-40 bg-background border-2 border-dashed border-border rounded-2xl flex flex-col items-center justify-center hover:border-primary hover:bg-primary/5 transition-all group outline-none focus-visible:ring-2 focus-visible:ring-primary cursor-pointer"
                 >
-                  <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-soft mb-3 group-hover:scale-110 transition-transform">
-                    <span className="text-2xl">📸</span>
+                  <div className="w-12 h-12 bg-card rounded-xl flex items-center justify-center shadow-sm mb-3 group-hover:scale-110 transition-transform text-primary border border-border">
+                    <Camera weight="duotone" className="w-6 h-6" />
                   </div>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Kamera</p>
+                  <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground group-hover:text-primary transition-colors">Kamera</p>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => triggerInput('file-input')}
-                  className="h-40 bg-background border-2 border-dashed border-slate-100 rounded-[32px] flex flex-col items-center justify-center hover:border-blue-400 hover:bg-blue-50 transition-all group"
+                  className="h-40 bg-background border-2 border-dashed border-border rounded-2xl flex flex-col items-center justify-center hover:border-primary hover:bg-primary/5 transition-all group outline-none focus-visible:ring-2 focus-visible:ring-primary cursor-pointer"
                 >
-                  <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-soft mb-3 group-hover:scale-110 transition-transform">
-                    <span className="text-2xl">📁</span>
+                  <div className="w-12 h-12 bg-card rounded-xl flex items-center justify-center shadow-sm mb-3 group-hover:scale-110 transition-transform text-primary border border-border">
+                    <ImageIcon weight="duotone" className="w-6 h-6" />
                   </div>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Galeri</p>
+                  <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground group-hover:text-primary transition-colors">Galeri</p>
                 </button>
               </div>
             )}
@@ -201,35 +197,33 @@ export default function AdminUploadPage() {
 
           {/* Form Fields */}
           <div className="space-y-6">
-            <div className="grid grid-cols-1 gap-6">
-              <div>
-                <label className="text-xs font-black uppercase tracking-widest text-slate-400 block mb-2">Nama Barang</label>
-                <input name="title" type="text" placeholder="Contoh: Kunci Motor Honda" className="w-full bg-background border border-slate-100 rounded-2xl py-4 px-6 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-blue-100 transition-all text-foreground" required />
-              </div>
+            <div>
+              <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground block mb-2">Nama Barang</label>
+              <input name="title" type="text" placeholder="Contoh: Kunci Motor Honda" className="w-full bg-background border border-border rounded-xl py-3 px-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary transition-all text-foreground placeholder:text-muted-foreground" required />
+            </div>
 
-              <div>
-                <label className="text-xs font-black uppercase tracking-widest text-slate-400 block mb-2">Kategori</label>
-                <select name="category" className="w-full bg-background border border-slate-100 rounded-2xl py-4 px-6 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-blue-100 transition-all text-foreground appearance-none" required>
-                  {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                </select>
-              </div>
+            <div>
+              <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground block mb-2">Kategori</label>
+              <select name="category" className="w-full bg-background border border-border rounded-xl py-3 px-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary transition-all text-foreground appearance-none" required>
+                {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+              </select>
+            </div>
 
-              <div>
-                <label className="text-xs font-black uppercase tracking-widest text-slate-400 block mb-2">Lokasi Penemuan</label>
-                <input name="location" type="text" placeholder="Contoh: Kantin Depan" className="w-full bg-background border border-slate-100 rounded-2xl py-4 px-6 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-blue-100 transition-all text-foreground" required />
-              </div>
+            <div>
+              <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground block mb-2">Lokasi Penemuan</label>
+              <input name="location" type="text" placeholder="Contoh: Kantin Depan" className="w-full bg-background border border-border rounded-xl py-3 px-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary transition-all text-foreground placeholder:text-muted-foreground" required />
+            </div>
 
-              <div>
-                <label className="text-xs font-black uppercase tracking-widest text-slate-400 block mb-2">Deskripsi Ciri-ciri</label>
-                <textarea name="description" rows={3} placeholder="Jelaskan detail barang..." className="w-full bg-background border border-slate-100 rounded-2xl py-4 px-6 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-blue-100 transition-all text-foreground"></textarea>
-              </div>
+            <div>
+              <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground block mb-2">Deskripsi Ciri-ciri</label>
+              <textarea name="description" rows={3} placeholder="Jelaskan detail barang..." className="w-full bg-background border border-border rounded-xl py-3 px-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary transition-all text-foreground placeholder:text-muted-foreground"></textarea>
             </div>
           </div>
 
           <button 
             type="submit" 
             disabled={loading}
-            className="w-full bg-blue-600 text-white py-5 rounded-[24px] font-black text-xs uppercase tracking-widest hover:bg-blue-700 hover:-translate-y-1 active:translate-y-0 transition-all shadow-xl shadow-blue-200 disabled:bg-slate-300"
+            className="w-full bg-primary text-on-primary py-4 rounded-xl font-bold text-sm tracking-wide hover:bg-primary/90 active:scale-[0.98] transition-all shadow-md disabled:opacity-50 disabled:active:scale-100 outline-none focus-visible:ring-4 focus-visible:ring-primary/30 cursor-pointer mt-4"
           >
             {loading ? 'MENYIMPAN DATA...' : 'SIMPAN & BROADCAST'}
           </button>
@@ -238,8 +232,8 @@ export default function AdminUploadPage() {
 
       {/* Camera Overlay */}
       {isCameraOpen && (
-        <div className="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center p-6">
-          <div className="relative w-full max-w-lg h-full max-h-[700px] rounded-[48px] overflow-hidden shadow-2xl">
+        <div className="fixed inset-0 z-[100] bg-black/95 flex flex-col items-center justify-center p-6">
+          <div className="relative w-full max-w-lg h-[80vh] rounded-3xl overflow-hidden shadow-2xl bg-black">
             <video
               id="camera-view"
               autoPlay
@@ -250,19 +244,16 @@ export default function AdminUploadPage() {
               className="w-full h-full object-cover"
             />
             
-            <div className="absolute bottom-10 inset-x-0 flex flex-col items-center gap-6 px-10">
-              <div className="flex items-center justify-between w-full">
-                <button onClick={stopCamera} className="w-14 h-14 rounded-full glass flex items-center justify-center text-white text-xl shadow-xl">
-                  ✕
-                </button>
-                
-                <button onClick={takePhoto} className="w-24 h-24 rounded-full bg-white p-2 shadow-2xl hover:scale-105 active:scale-95 transition-transform">
-                  <div className="w-full h-full rounded-full border-4 border-slate-900" />
-                </button>
+            <div className="absolute bottom-10 inset-x-0 flex justify-center items-center gap-10 px-8">
+              <button onClick={stopCamera} className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/30 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-white">
+                <X weight="bold" className="w-6 h-6" />
+              </button>
+              
+              <button onClick={takePhoto} className="w-20 h-20 rounded-full bg-white p-1 shadow-lg hover:scale-105 active:scale-95 transition-transform cursor-pointer outline-none focus-visible:ring-4 focus-visible:ring-white/50">
+                <div className="w-full h-full rounded-full border-[6px] border-black/80" />
+              </button>
 
-                <div className="w-14" />
-              </div>
-              <p className="text-white font-black text-[10px] uppercase tracking-widest opacity-70">Ambil Foto Barang</p>
+              <div className="w-12" />
             </div>
           </div>
         </div>
@@ -278,4 +269,3 @@ export default function AdminUploadPage() {
     </main>
   );
 }
-

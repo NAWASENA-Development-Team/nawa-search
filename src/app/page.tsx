@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import ItemCard from '@/components/items/ItemCard';
 import Navbar from '@/components/shared/Navbar';
+import { MagnifyingGlass, Package } from '@phosphor-icons/react';
 
 const CATEGORIES = ['Semua', 'Elektronik', 'Atribut', 'Alat Tulis', 'Dompet/Kunci', 'Lainnya'];
 
@@ -17,19 +18,16 @@ export default function Home() {
     const fetchItems = async () => {
       setLoading(true);
       
-      // Ambil data yang statusnya hanya 'Tersedia'
       let query = supabase
         .from('items')
         .select('*')
         .eq('status', 'Tersedia')
         .order('created_at', { ascending: false });
 
-      // Filter Pencarian Teks
       if (searchQuery) {
         query = query.ilike('title', `%${searchQuery}%`);
       }
 
-      // Filter Kategori
       if (activeCategory !== 'Semua') {
         query = query.eq('category', activeCategory);
       }
@@ -42,7 +40,6 @@ export default function Home() {
       setLoading(false);
     };
 
-    // Pakai sedikit delay (debounce) biar tidak spam request ke database tiap kali ngetik
     const delayDebounceFn = setTimeout(() => {
       fetchItems();
     }, 300);
@@ -54,45 +51,45 @@ export default function Home() {
     <div className="min-h-screen bg-background transition-colors duration-300">
       <Navbar />
       
-      <main className="max-w-6xl mx-auto px-4 md:px-6 pt-28 md:pt-36 pb-20 md:pb-32">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-32 md:pt-40 pb-24 md:pb-32">
         {/* Hero Section */}
-        <div className="text-center mb-10 md:mb-16 animate-fade-in-up px-2">
-          <div className="inline-block px-4 py-1 bg-blue-50 rounded-full mb-4 md:mb-6">
-            <span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-blue-600">Solusi Kehilangan Barang</span>
+        <div className="text-center mb-12 md:mb-20 animate-fade-in-up">
+          <div className="inline-block px-3 py-1 bg-primary/10 rounded-full mb-6 border border-primary/20">
+            <span className="text-xs font-bold text-primary tracking-wide">Pusat Informasi Kehilangan</span>
           </div>
-          <h1 className="text-4xl md:text-7xl font-black text-foreground mb-4 md:mb-6 tracking-tighter leading-[1.1]">
-            Temukan Barangmu <br />
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold text-foreground mb-6 tracking-tight leading-tight">
+            Temukan Barangmu <br className="hidden sm:block" />
             <span className="text-gradient">Cepat & Mudah.</span>
           </h1>
-          <p className="text-slate-500 max-w-sm md:max-w-md mx-auto text-xs md:text-sm font-medium leading-relaxed">
-            Pusat informasi barang temuan di area sekolah. <br className="hidden sm:block" />
-            Kehilangan sesuatu? Cari di sini sekarang.
+          <p className="text-muted-foreground max-w-lg mx-auto text-sm md:text-base font-medium leading-relaxed">
+            Pusat informasi barang temuan di area sekolah.
+            Kehilangan sesuatu? Cari di sini sekarang atau laporkan barang yang kamu temukan.
           </p>
         </div>
 
         {/* Search & Filter Section */}
-        <div className="glass p-2 md:p-3 rounded-[24px] md:rounded-[32px] shadow-premium mb-8 md:mb-12 sticky top-20 md:top-24 z-40 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-          <div className="relative mb-2 md:mb-3">
+        <div className="glass p-4 rounded-2xl shadow-soft mb-12 sticky top-24 z-40 animate-fade-in-up border border-border" style={{ animationDelay: '0.1s' }}>
+          <div className="relative mb-4">
+            <MagnifyingGlass weight="bold" className="absolute left-5 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5" />
             <input 
               type="text"
-              placeholder="Cari Barang..."
-              className="w-full bg-background border border-slate-100 rounded-2xl md:rounded-3xl py-4 md:py-5 pl-12 md:pl-14 pr-4 md:pr-6 text-xs md:text-sm font-bold placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:bg-white transition-all shadow-inner text-foreground"
+              placeholder="Cari barang hilang (contoh: Kunci Motor, Dompet)..."
+              className="w-full bg-background border border-border rounded-xl py-4 pl-14 pr-6 text-sm font-medium placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all text-foreground"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
-            <span className="absolute left-4 md:left-6 top-1/2 -translate-y-1/2 text-lg md:text-xl">🔍</span>
           </div>
 
           {/* Category Pills */}
-          <div className="flex gap-2 overflow-x-auto px-1 md:px-2 pb-1 scrollbar-hide">
+          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
             {CATEGORIES.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
-                className={`whitespace-nowrap px-4 md:px-6 py-2 md:py-2.5 rounded-xl md:rounded-2xl text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${
+                className={`whitespace-nowrap px-5 py-2.5 rounded-lg text-xs font-bold tracking-wide transition-all duration-200 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-primary ${
                   activeCategory === cat 
-                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' 
-                    : 'bg-background text-slate-400 hover:bg-white hover:text-slate-900 border border-slate-100'
+                    ? 'bg-primary text-on-primary shadow-sm' 
+                    : 'bg-background text-muted-foreground hover:bg-muted hover:text-foreground border border-border'
                 }`}
               >
                 {cat}
@@ -102,20 +99,27 @@ export default function Home() {
         </div>
 
         {/* Item Grid Section */}
-        <div className="mb-6 md:mb-8 flex justify-between items-center px-4 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-          <h2 className="text-[9px] md:text-xs font-black uppercase tracking-widest text-slate-400">
-            {loading ? 'SINKRONISASI DATABASE...' : `DATA TERBARU (${items.length})`}
+        <div className="mb-8 flex justify-between items-center animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+          <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+            {loading ? 'Sinkronisasi Data...' : `Barang Temuan (${items.length})`}
           </h2>
-          <div className="h-px bg-slate-100 flex-grow mx-4 hidden sm:block" />
-          <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+          {!loading && (
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-emerald-600">Live</span>
+              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            </div>
+          )}
         </div>
 
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="h-80 bg-white rounded-[32px] md:rounded-[40px] shadow-soft animate-pulse p-4 flex flex-col gap-4">
-                 <div className="w-full h-56 bg-slate-50 rounded-[24px] md:rounded-[32px]" />
-                 <div className="h-4 bg-slate-50 w-2/3 rounded-full" />
+              <div key={i} className="h-[22rem] bg-card rounded-2xl border border-border shadow-soft animate-pulse flex flex-col overflow-hidden">
+                 <div className="w-full h-52 bg-muted" />
+                 <div className="p-5 flex flex-col gap-4 flex-grow">
+                   <div className="h-5 bg-muted w-3/4 rounded-md" />
+                   <div className="mt-auto h-4 bg-muted w-1/2 rounded-md" />
+                 </div>
               </div>
             ))}
           </div>
@@ -126,16 +130,17 @@ export default function Home() {
             ))}
           </div>
         ) : (
-          <div className="text-center py-20 md:py-32 bg-white rounded-[32px] md:rounded-[48px] border-4 border-dashed border-slate-50 animate-fade-in-up">
-            <div className="text-5xl md:text-6xl mb-6 grayscale opacity-20">🔎</div>
-            <h3 className="text-lg md:text-xl font-black text-[#0f172a] mb-2 tracking-tight">Barang Belum Ditemukan</h3>
-            <p className="text-slate-400 text-xs md:text-sm font-medium max-w-xs mx-auto">
-              Sepertinya barang yang kamu cari belum ada di daftar kami. Tetap pantau ya!
+          <div className="flex flex-col items-center justify-center text-center py-24 bg-card rounded-2xl border border-border animate-fade-in-up">
+            <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-6">
+              <Package weight="duotone" className="w-8 h-8 text-muted-foreground" />
+            </div>
+            <h3 className="text-xl font-bold text-foreground mb-2">Barang Tidak Ditemukan</h3>
+            <p className="text-muted-foreground text-sm font-medium max-w-sm mx-auto">
+              Sepertinya barang yang kamu cari belum ada di daftar kami. Coba gunakan kata kunci lain atau pilih kategori Semua.
             </p>
           </div>
         )}
       </main>
-
     </div>
   );
 }
